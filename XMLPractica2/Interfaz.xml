@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Interfaz>
+
+	<MenuPrincipal>
+		<MenuItem texto="Archivo">
+			<MenuItem texto="Abrir" />
+			<MenuItem texto="Guardar" />
+			<MenuItem texto="-" />
+			<MenuItem texto="Salir" />
+		</MenuItem>
+		<MenuItem texto="Ayuda">
+			<MenuItem texto="Acerca de..." />
+		</MenuItem>
+	</MenuPrincipal>
+
+	<Controles>
+
+		<Control>
+			<tipo>Label</tipo>
+			<nombre>lblBienvenida</nombre>
+			<texto>Gestor de Usuarios (XML)</texto>
+			<posicionX>20</posicionX>
+			<posicionY>40</posicionY>
+			<ancho>300</ancho>
+			<alto>23</alto>
+			<colorTexto>DarkSlateBlue</colorTexto>
+		</Control>
+
+		<Control>
+			<tipo>GroupBox</tipo>
+			<nombre>gbAcciones</nombre>
+			<texto>Acciones</texto>
+			<posicionX>20</posicionX>
+			<posicionY>80</posicionY>
+			<ancho>420</ancho>
+			<alto>100</alto>
+			<colorFondo>WhiteSmoke</colorFondo>
+
+			<ControlesHijos>
+				<Control>
+					<tipo>Panel</tipo>
+					<nombre>pnlButtonContainer</nombre>
+					<texto></texto>
+					<posicionX>40</posicionX>
+					<posicionY>20</posicionY>
+					<ancho>320</ancho>
+					<alto>50</alto>
+					<colorFondo>WhiteSmoke</colorFondo>
+					<ControlesHijos>
+						<Control>
+							<tipo>Button</tipo>
+							<nombre>btnAnadir</nombre>
+							<texto>Añadir</texto>
+							<posicionX>10</posicionX>
+							<posicionY>5</posicionY>
+							<ancho>100</ancho>
+							<alto>35</alto>
+							<colorFondo>LightGreen</colorFondo>
+						</Control>
+						<Control>
+							<tipo>Button</tipo>
+							<nombre>btnEditar</nombre>
+							<texto>Editar</texto>
+							<posicionX>110</posicionX>
+							<posicionY>5</posicionY>
+							<ancho>100</ancho>
+							<alto>35</alto>
+							<colorFondo>LightSkyBlue</colorFondo>
+						</Control>
+						<Control>
+							<tipo>Button</tipo>
+							<nombre>btnEliminar</nombre>
+							<texto>Eliminar</texto>
+							<posicionX>210</posicionX>
+							<posicionY>5</posicionY>
+							<ancho>100</ancho>
+							<alto>35</alto>
+							<colorFondo>LightSalmon</colorFondo>
+						</Control>
+					</ControlesHijos>
+				</Control>
+			</ControlesHijos>
+		</Control>
+
+		<Control>
+			<tipo>DataGridView</tipo>
+			<nombre>gridDatos</nombre>
+			<texto>Tabla de Datos</texto>
+			<posicionX>20</posicionX>
+			<posicionY>200</posicionY>
+			<ancho>420</ancho>
+			<alto>220</alto>
+			<Columnas>
+				<Columna nombre="colID" textoHeader="ID Usuario" />
+				<Columna nombre="colNombre" textoHeader="Nombre" />
+				<Columna nombre="colEmail" textoHeader="Correo Electrónico" />
+			</Columnas>
+		</Control>
+
+	</Controles>
+
+	<Datos>
+		<Usuarios>
+			<Usuario id="1" nombre="Ana García" email="ana.garcia@email.com" />
+			<Usuario id="2" nombre="Luis Soler" email="l.soler@email.com" />
+			<Usuario id="3" nombre="Eva Méndez" email="eva.mendez@email.com" />
+		</Usuarios>
+	</Datos>
+
+</Interfaz>
