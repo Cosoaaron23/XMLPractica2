@@ -9,6 +9,8 @@ namespace XMLPractica2 // <-- ¡Recuerda usar el tuyo!
     public partial class Form1 : Form
     {
         private DataGridView miGrid;
+        private XmlDocument doc;
+        private string rutaArchivo;
 
         public Form1()
         {
@@ -26,14 +28,14 @@ namespace XMLPractica2 // <-- ¡Recuerda usar el tuyo!
 
             try
             {
-                XmlDocument doc = new XmlDocument();
-                string rutaArchivo = Path.Combine(Application.StartupPath, "Interfaz.xml");
-                doc.Load(rutaArchivo);
+                this.doc = new XmlDocument();
+                this.rutaArchivo = Path.Combine(Application.StartupPath, "Interfaz.xml");
+                this.doc.Load(this.rutaArchivo);
 
-                GenerarMenu(doc);
-                XmlNodeList nodosControl = doc.SelectNodes("/Interfaz/Controles/Control");
+                GenerarMenu();
+                XmlNodeList nodosControl = this.doc.SelectNodes("/Interfaz/Controles/Control");
                 GenerarControles(nodosControl, this);
-                CargarDatosEnGrid(doc);
+                CargarDatosEnGrid();
             }
             catch (Exception ex)
             {
@@ -41,10 +43,10 @@ namespace XMLPractica2 // <-- ¡Recuerda usar el tuyo!
             }
         }
 
-        private void CargarDatosEnGrid(XmlDocument doc)
+        private void CargarDatosEnGrid()
         {
             if (this.miGrid == null) return;
-            XmlNodeList listaUsuarios = doc.SelectNodes("/Interfaz/Datos/Usuarios/Usuario");
+            XmlNodeList listaUsuarios = this.doc.SelectNodes("/Interfaz/Datos/Usuarios/Usuario");
             foreach (XmlNode usuario in listaUsuarios)
             {
                 this.miGrid.Rows.Add(
@@ -55,12 +57,12 @@ namespace XMLPractica2 // <-- ¡Recuerda usar el tuyo!
             }
         }
 
-        private void GenerarMenu(XmlDocument doc)
+        private void GenerarMenu()
         {
             MenuStrip menuPrincipal = new MenuStrip();
             menuPrincipal.Dock = DockStyle.Top;
 
-            XmlNodeList itemsNivel1 = doc.SelectNodes("/Interfaz/MenuPrincipal/MenuItem");
+            XmlNodeList itemsNivel1 = this.doc.SelectNodes("/Interfaz/MenuPrincipal/MenuItem");
             PoblarMenuItems(itemsNivel1, menuPrincipal.Items);
             this.Controls.Add(menuPrincipal);
         }
@@ -148,9 +150,12 @@ namespace XMLPractica2 // <-- ¡Recuerda usar el tuyo!
                         newGrid.MultiSelect = false;
                         newGrid.AllowUserToAddRows = false;
                         newGrid.AllowUserToDeleteRows = false;
-                        newGrid.ReadOnly = true;
+
+                        // --- MODIFICACIÓN 1: Permitir la edición ---
+                        newGrid.ReadOnly = false;
+
                         newGrid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-                        newGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill; // Mantenemos el rellenado
+                        newGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
                         newGrid.BackgroundColor = Color.White;
                         newGrid.BorderStyle = BorderStyle.None;
                         newGrid.EnableHeadersVisualStyles = false;
@@ -158,49 +163,40 @@ namespace XMLPractica2 // <-- ¡Recuerda usar el tuyo!
                         newGrid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
                         newGrid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
                         newGrid.ColumnHeadersDefaultCellStyle.Padding = new Padding(4);
-
-                        // --- ARREGLO 1: Evitar que el header cambie de color al seleccionar ---
                         newGrid.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(70, 70, 70);
-
                         newGrid.RowsDefaultCellStyle.BackColor = Color.White;
                         newGrid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(240, 240, 240);
-
-                        // --- ARREGLO 2: Colores de selección personalizados ---
-                        newGrid.RowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(200, 225, 255); // Azul claro
-                        newGrid.RowsDefaultCellStyle.SelectionForeColor = Color.Black; // Texto negro
-
+                        newGrid.RowsDefaultCellStyle.SelectionBackColor = Color.FromArgb(200, 225, 255);
+                        newGrid.RowsDefaultCellStyle.SelectionForeColor = Color.Black;
                         newGrid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
                         newGrid.RowHeadersVisible = false;
 
-                        // --- ARREGLO 3: Asignar pesos (FillWeight) a las columnas ---
                         foreach (XmlNode colNodo in nodo.SelectNodes("Columnas/Columna"))
                         {
                             string colNombre = colNodo.Attributes["nombre"].Value;
                             string colHeader = colNodo.Attributes["textoHeader"].Value;
-
-                            newGrid.Columns.Add(colNombre, colHeader); // Añadimos la columna
-
-                            // Asignamos el peso
-                            if (colNombre == "colID")
-                            {
-                                newGrid.Columns[colNombre].FillWeight = 15; // Más pequeña
-                            }
-                            else if (colNombre == "colNombre")
-                            {
-                                newGrid.Columns[colNombre].FillWeight = 35; // Mediana
-                            }
-                            else if (colNombre == "colEmail")
-                            {
-                                newGrid.Columns[colNombre].FillWeight = 50; // Más grande
-                            }
+                            newGrid.Columns.Add(colNombre, colHeader);
+                            if (colNombre == "colID") newGrid.Columns[colNombre].FillWeight = 15;
+                            else if (colNombre == "colNombre") newGrid.Columns[colNombre].FillWeight = 35;
+                            else if (colNombre == "colEmail") newGrid.Columns[colNombre].FillWeight = 50;
                         }
+
+                        // --- MODIFICACIÓN 2: Proteger la columna ID ---
+                        if (newGrid.Columns["colID"] != null)
+                        {
+                            newGrid.Columns["colID"].ReadOnly = true;
+                            // Poner un fondo gris para que se note que no es editable
+                            newGrid.Columns["colID"].DefaultCellStyle.BackColor = Color.FromArgb(230, 230, 230);
+                            newGrid.Columns["colID"].DefaultCellStyle.ForeColor = Color.Black;
+                            newGrid.Columns["colID"].DefaultCellStyle.SelectionBackColor = Color.FromArgb(210, 210, 210);
+                        }
+
                         this.miGrid = newGrid;
                         nuevoControl = newGrid;
                         break;
                 }
 
                 if (nuevoControl == null) continue;
-
                 nuevoControl.Name = nombre;
                 nuevoControl.Text = texto;
                 nuevoControl.Location = new Point(posX, posY);
@@ -209,17 +205,10 @@ namespace XMLPractica2 // <-- ¡Recuerda usar el tuyo!
                 {
                     nuevoControl.Anchor = AnchorStyles.Top | AnchorStyles.Left;
                 }
-
                 try
                 {
-                    if (nodo["colorFondo"] != null)
-                    {
-                        nuevoControl.BackColor = ColorTranslator.FromHtml(nodo["colorFondo"].InnerText);
-                    }
-                    if (nodo["colorTexto"] != null)
-                    {
-                        nuevoControl.ForeColor = ColorTranslator.FromHtml(nodo["colorTexto"].InnerText);
-                    }
+                    if (nodo["colorFondo"] != null) nuevoControl.BackColor = ColorTranslator.FromHtml(nodo["colorFondo"].InnerText);
+                    if (nodo["colorTexto"] != null) nuevoControl.ForeColor = ColorTranslator.FromHtml(nodo["colorTexto"].InnerText);
                 }
                 catch (Exception) { /* Ignorar colores inválidos */ }
 
@@ -241,10 +230,7 @@ namespace XMLPractica2 // <-- ¡Recuerda usar el tuyo!
                 {
                     if (int.TryParse(fila.Cells["colID"].Value.ToString(), out int idActual))
                     {
-                        if (idActual > maxID)
-                        {
-                            maxID = idActual;
-                        }
+                        if (idActual > maxID) maxID = idActual;
                     }
                 }
             }
@@ -260,19 +246,14 @@ namespace XMLPractica2 // <-- ¡Recuerda usar el tuyo!
             {
                 case "btnAnadir":
                     string nuevoID = ObtenerSiguienteID();
-                    this.miGrid.Rows.Add(nuevoID, "Usuario Fijo", "email@fijo.com");
+                    this.miGrid.Rows.Add(nuevoID, "Nuevo Usuario", "email@nuevo.com");
                     break;
+
+                // --- MODIFICACIÓN 3: Cambiar la lógica del botón "Editar" ---
                 case "btnEditar":
-                    if (this.miGrid.SelectedRows.Count > 0)
-                    {
-                        DataGridViewRow fila = this.miGrid.SelectedRows[0];
-                        fila.Cells["colNombre"].Value = fila.Cells["colNombre"].Value.ToString() + " (Editado)";
-                    }
-                    else
-                    {
-                        MessageBox.Show("Seleccione una fila para editar.");
-                    }
+                    MessageBox.Show("Puedes editar el Nombre y el Correo directamente en la tabla.\n\nEl ID no se puede modificar.", "Información", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     break;
+
                 case "btnEliminar":
                     if (this.miGrid.SelectedRows.Count > 0)
                     {
@@ -290,12 +271,57 @@ namespace XMLPractica2 // <-- ¡Recuerda usar el tuyo!
             }
         }
 
+        private void GuardarDatosEnXML()
+        {
+            try
+            {
+                XmlNode nodoUsuarios = this.doc.SelectSingleNode("/Interfaz/Datos/Usuarios");
+                if (nodoUsuarios == null) return;
+
+                nodoUsuarios.RemoveAll();
+
+                foreach (DataGridViewRow fila in this.miGrid.Rows)
+                {
+                    if (fila.IsNewRow) continue;
+
+                    XmlElement nuevoUsuario = this.doc.CreateElement("Usuario");
+
+                    string id = fila.Cells["colID"].Value?.ToString() ?? "0";
+                    string nombre = fila.Cells["colNombre"].Value?.ToString() ?? "";
+                    string email = fila.Cells["colEmail"].Value?.ToString() ?? "";
+
+                    nuevoUsuario.SetAttribute("id", id);
+                    nuevoUsuario.SetAttribute("nombre", nombre);
+                    nuevoUsuario.SetAttribute("email", email);
+
+                    nodoUsuarios.AppendChild(nuevoUsuario);
+                }
+
+                this.doc.Save(this.rutaArchivo);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar los datos en el XML: " + ex.Message, "Error de Guardado", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            GuardarDatosEnXML();
+        }
+
         private void MiManejadorMenuClick(object sender, EventArgs e)
         {
             ToolStripMenuItem itemPresionado = (ToolStripMenuItem)sender;
+
             if (itemPresionado.Text == "Salir")
             {
-                Application.Exit();
+                this.Close();
+            }
+            else if (itemPresionado.Text == "Guardar")
+            {
+                GuardarDatosEnXML();
+                MessageBox.Show("¡Datos guardados con éxito!", "Guardado", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
